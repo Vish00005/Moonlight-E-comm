@@ -1,0 +1,84 @@
+/* index.css */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary: #ffffff; /* Clean white */
+  --secondary: #111111; /* Sharp black for contrast */
+  --accent: #f0f0f0; /* Soft gray for backgrounds */
+  --text-main: #1a1a1a;
+  --text-muted: #666666;
+  --bg-main: #ffffff;
+  --bg-card: #f9f9f9;
+  --border-color: #e5e5e5;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Outfit', sans-serif;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--text-muted);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+  font-family: inherit;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Utilities */
+.btn-primary {
+  background: var(--secondary);
+  color: var(--primary);
+  padding: 12px 28px;
+  border-radius: 4px; /* Less rounded, more plain */
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border: 1px solid var(--secondary);
+}
+
+.btn-primary:hover {
+  opacity: 0.8;
+}
+
+.input-field {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 4px;
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  margin-bottom: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.input-field:focus {
+  border-color: var(--secondary);
+  outline: none;
+}

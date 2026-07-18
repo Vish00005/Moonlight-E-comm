@@ -1,0 +1,21 @@
+import Category from '../models/Category.js';
+
+export const getCategories = async (req, res) => {
+  try {
+    const categories = await Category.find({});
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const createCategory = async (req, res) => {
+  try {
+    const { name, image } = req.body;
+    const category = new Category({ name, image });
+    const createdCategory = await category.save();
+    res.status(201).json(createdCategory);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

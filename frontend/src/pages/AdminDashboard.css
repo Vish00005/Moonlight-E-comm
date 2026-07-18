@@ -1,0 +1,36 @@
+.admin-page {
+  padding: 40px 20px;
+}
+
+.admin-page h2 {
+  margin-bottom: 30px;
+  color: var(--secondary);
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.admin-card {
+  background: var(--bg-card);
+  padding: 30px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.admin-card h3 {
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+.admin-card p {
+  color: var(--text-muted);
+  margin-bottom: 25px;
+}
+
+.admin-card button {
+  width: 100%;
+}

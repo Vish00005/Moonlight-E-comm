@@ -1,0 +1,157 @@
+.payment-page {
+  padding-top: 120px;
+  padding-bottom: 120px;
+  min-height: 70vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.payment-container {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 40px;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  max-width: 900px;
+  width: 100%;
+}
+
+.payment-summary {
+  background: var(--bg-card);
+  padding: 40px;
+  border-right: 1px solid var(--border-color);
+}
+
+.payment-summary h3 {
+  font-size: 20px;
+  margin-bottom: 30px;
+  color: var(--text-main);
+}
+
+.summary-item {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.summary-item img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.summary-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.summary-info h4 {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--text-main);
+}
+
+.summary-info span {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.payment-summary hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 30px 0;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  color: var(--text-main);
+}
+
+.summary-total strong {
+  font-size: 24px;
+  color: var(--secondary);
+}
+
+.payment-form-container {
+  padding: 40px;
+}
+
+.payment-form-container h3 {
+  font-size: 20px;
+  margin-bottom: 30px;
+  color: var(--text-main);
+}
+
+.payment-form .form-group {
+  margin-bottom: 20px;
+}
+
+.payment-form label {
+  display: block;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.payment-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.btn-pay {
+  width: 100%;
+  padding: 16px;
+  margin-top: 10px;
+}
+
+.btn-pay:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Success Card */
+.payment-success-card {
+  text-align: center;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  padding: 60px;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.success-icon {
+  margin-bottom: 24px;
+}
+
+.payment-success-card h2 {
+  font-size: 28px;
+  margin-bottom: 16px;
+  color: var(--text-main);
+}
+
+.payment-success-card p {
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .payment-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .payment-summary {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+}
