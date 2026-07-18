@@ -1,20 +1,26 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { AuthContext } from './AuthContext';
 
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
+  const { user } = useContext(AuthContext);
+
+  const getCartKey = () => `cart_${user?._id || 'guest'}`;
 
   useEffect(() => {
-    const savedCart = localStorage.getItem('cartItems');
+    const savedCart = localStorage.getItem(getCartKey());
     if (savedCart) {
       setCart(JSON.parse(savedCart));
+    } else {
+      setCart([]);
     }
-  }, []);
+  }, [user]); // Re-run when user logs in/out
 
   useEffect(() => {
-    localStorage.setItem('cartItems', JSON.stringify(cart));
-  }, [cart]);
+    localStorage.setItem(getCartKey(), JSON.stringify(cart));
+  }, [cart, user]);
 
   const addToCart = (product, qty = 1) => {
     setCart((prevCart) => {

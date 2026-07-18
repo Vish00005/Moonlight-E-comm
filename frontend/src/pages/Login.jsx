@@ -14,7 +14,11 @@ const Login = () => {
     e.preventDefault();
     const res = await login(email, password);
     if (res.success) {
-      navigate('/');
+      if (res.isAdmin) {
+        navigate('/admin-moonlight-secret');
+      } else {
+        navigate(-1); // Navigates back to the page the user was on before login
+      }
     } else {
       setError(res.message);
     }

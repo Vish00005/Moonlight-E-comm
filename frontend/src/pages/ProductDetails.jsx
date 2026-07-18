@@ -67,14 +67,20 @@ const ProductDetails = () => {
           </div>
           
           <div className="product-actions">
-            <button className="btn-add-to-cart" onClick={() => addToCart(product)}>
-              <ShoppingCart size={20} />
-              Add to Cart
-            </button>
-            <button className="btn-buy-now" onClick={handleBuyNow}>
-              <CreditCard size={20} />
-              Buy Now
-            </button>
+            {product.countInStock > 0 ? (
+              <>
+                <button className="btn-add-to-cart" onClick={() => addToCart(product)}>
+                  <ShoppingCart size={20} />
+                  Add to Cart
+                </button>
+                <button className="btn-buy-now" onClick={handleBuyNow}>
+                  <CreditCard size={20} />
+                  Buy Now
+                </button>
+              </>
+            ) : (
+              <p style={{ color: '#ef4444', fontWeight: '600', fontSize: '18px' }}>Out of Stock</p>
+            )}
           </div>
           
           <div className="shipping-info">

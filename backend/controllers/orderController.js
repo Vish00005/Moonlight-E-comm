@@ -7,6 +7,15 @@ export const addOrderItems = async (req, res) => {
     if (orderItems && orderItems.length === 0) {
       return res.status(400).json({ message: 'No order items' });
     } else {
+      // Decrease stock
+      for (const item of orderItems) {
+        const product = await Product.findById(item.product);
+        if (product) {
+          product.countInStock = Math.max(0, product.countInStock - item.qty);
+          await product.save();
+        }
+      }
+
       const order = new Order({
         orderItems,
         user: req.user._id,

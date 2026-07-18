@@ -1,36 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
+import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 import './Payment.css';
 
 const Payment = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const product = location.state?.product;
+  const { user } = useContext(AuthContext);
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // If no product is passed, redirect back to home
-  if (!product) {
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
+
+  if (!product || !user) {
     return <Navigate to="/" replace />;
   }
 
-  const handlePaymentSubmit = (e) => {
+  const handlePaymentSubmit = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
     
-    // Simulate API call to payment gateway
-    setTimeout(() => {
-      setIsProcessing(false);
-      setIsSuccess(true);
+    try {
+      const config = { headers: { Authorization: `Bearer ${user.token}` } };
+      const orderItems = [{
+        name: product.name,
+        qty: 1,
+        image: product.image,
+        price: product.price,
+        product: product._id
+      }];
       
-      // Redirect to profile after showing success message
+      await axios.post('/api/orders', { orderItems, totalPrice: product.price }, config);
+      
+      // Simulate payment gateway delay
       setTimeout(() => {
-        navigate('/profile');
-      }, 2500);
-    }, 2000);
+        setIsProcessing(false);
+        setIsSuccess(true);
+        setTimeout(() => navigate('/profile'), 2500);
+      }, 1000);
+    } catch (error) {
+      alert(error.response?.data?.message || 'Error processing order');
+      setIsProcessing(false);
+    }
   };
 
   return (
