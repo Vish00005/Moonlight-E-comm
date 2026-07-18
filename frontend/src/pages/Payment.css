@@ -22,6 +22,8 @@
 
 .payment-summary {
   background: var(--bg-card);
+  padding: 40px;
+  border-right: 1px solid var(--border-color);
   transition: all 0.3s ease;
 }
 
@@ -80,9 +82,7 @@
 
 .method-card span {
   font-weight: 500;
-}  border-right: 1px solid var(--border-color);
 }
-
 .payment-summary h3 {
   font-size: 20px;
   margin-bottom: 30px;
