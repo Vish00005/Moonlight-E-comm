@@ -17,10 +17,7 @@ const Cart = () => {
       navigate('/login');
       return;
     }
-    // Simulate placing order
-    alert('Order placed successfully! In a real app, this would route to a payment gateway.');
-    clearCart();
-    navigate('/profile');
+    navigate('/payment', { state: { orderItems: cart, total } });
   };
 
   return (

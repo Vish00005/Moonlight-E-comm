@@ -22,7 +22,11 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="container nav-container">
         <Link to="/" className="nav-brand">
-          <Moon className="brand-icon" />
+          <img 
+            src="https://res.cloudinary.com/ddglanrrg/image/upload/v1784363791/moonlight-logo_oulp3m.png" 
+            alt="MoonLight Logo" 
+            style={{ width: '56px', height: '56px', objectFit: 'contain', marginRight: '4px' }} 
+          />
           <span>MoonLight</span>
         </Link>
 

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Trash2, Edit, Plus, BarChart2, Package } from 'lucide-react';
+import { Trash2, Edit, Plus, BarChart2, Package, ShoppingBag } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import './AdminDashboard.css';
 
@@ -11,6 +11,7 @@ const AdminDashboard = () => {
   
   const [activeTab, setActiveTab] = useState('products');
   const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -29,6 +30,7 @@ const AdminDashboard = () => {
       return;
     }
     fetchProducts();
+    fetchOrders();
     fetchAnalytics();
   }, [user, navigate]);
 
@@ -41,12 +43,30 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchOrders = async () => {
+    try {
+      const { data } = await axios.get('/api/orders', config);
+      setOrders(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const fetchAnalytics = async () => {
     try {
       const { data } = await axios.get('/api/orders/analytics', config);
       setAnalytics(data);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      await axios.put(`/api/orders/${orderId}/status`, { status: newStatus }, config);
+      fetchOrders();
+    } catch (err) {
+      alert('Error updating order status');
     }
   };
 
@@ -110,6 +130,12 @@ const AdminDashboard = () => {
             <Package size={18} /> Products
           </button>
           <button 
+            className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
+            onClick={() => setActiveTab('orders')}
+          >
+            <ShoppingBag size={18} /> Orders
+          </button>
+          <button 
             className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
             onClick={() => setActiveTab('analytics')}
           >
@@ -169,7 +195,12 @@ const AdminDashboard = () => {
                     accept="image/*" 
                     style={{ padding: '6px' }}
                   />
-                  {formData.image && <p style={{ fontSize: '12px', marginTop: '5px', color: 'var(--primary)' }}>Image ready!</p>}
+                  {formData.image && (
+                    <div style={{ marginTop: '10px' }}>
+                      <img src={formData.image} alt="Uploaded preview" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border-color)' }} />
+                      <p style={{ fontSize: '12px', marginTop: '5px', color: 'var(--primary)' }}>CDN URL Attached: {formData.image.substring(0, 30)}...</p>
+                    </div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Description</label>
@@ -209,6 +240,58 @@ const AdminDashboard = () => {
                   {products.length === 0 && (
                     <tr>
                       <td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>No products found in database.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'orders' && (
+          <div className="orders-section">
+            <div className="section-header">
+              <h3>Customer Orders</h3>
+            </div>
+            <div className="table-responsive">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map(order => (
+                    <tr key={order._id}>
+                      <td>{order._id.substring(0, 8)}...</td>
+                      <td>{order.user?.name || 'Unknown'}</td>
+                      <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                      <td>₹{order.totalPrice.toFixed(2)}</td>
+                      <td>{order.paymentMethod}</td>
+                      <td>
+                        <select 
+                          className="status-dropdown" 
+                          value={order.deliveryStatus} 
+                          onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                          disabled={order.deliveryStatus === 'Cancelled'}
+                        >
+                          <option value="Ordered">Ordered</option>
+                          <option value="Packed">Packed</option>
+                          <option value="Shipped">Shipped</option>
+                          <option value="Delivered">Delivered</option>
+                          {order.deliveryStatus === 'Cancelled' && <option value="Cancelled">Cancelled</option>}
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                  {orders.length === 0 && (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>No orders found.</td>
                     </tr>
                   )}
                 </tbody>

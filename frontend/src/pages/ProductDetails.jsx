@@ -41,7 +41,18 @@ const ProductDetails = () => {
   }
 
   const handleBuyNow = () => {
-    navigate('/payment', { state: { product } });
+    const orderItems = [{
+      name: product.name,
+      qty: 1,
+      image: product.image,
+      price: product.price,
+      product: product._id
+    }];
+    navigate('/payment', { state: { orderItems, total: product.price } });
+  };
+
+  const getEstDeliveryDate = (days) => {
+    return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   return (
@@ -84,6 +95,7 @@ const ProductDetails = () => {
           </div>
           
           <div className="shipping-info">
+            <p><strong>Estimated Delivery:</strong> {getEstDeliveryDate(3)} - {getEstDeliveryDate(5)}</p>
             <p><strong>Free Delivery</strong> on orders over ₹1000.</p>
             <p><strong>Returns:</strong> 30-day hassle-free return policy.</p>
           </div>

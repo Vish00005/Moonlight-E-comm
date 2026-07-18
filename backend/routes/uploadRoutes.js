@@ -1,8 +1,8 @@
 import express from 'express';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import dotenv from 'dotenv';
+import fs from 'fs';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
 dotenv.config();
@@ -15,23 +15,37 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'kiki-tech-solutions',
-    allowedFormats: ['jpeg', 'png', 'jpg', 'webp'],
+const storage = multer.diskStorage({
+  destination(req, file, cb) {
+    cb(null, 'uploads/');
   },
+  filename(req, file, cb) {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
-router.post('/', protect, admin, upload.single('image'), (req, res) => {
+router.post('/', protect, admin, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No image provided' });
     }
-    res.json({ url: req.file.path });
+
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "kiki-tech-solutions"
+    }); 
+    
+    // Clean up local file after upload
+    try {
+      fs.unlinkSync(req.file.path);
+    } catch (err) {
+      console.error('Failed to clean up file:', err);
+    }
+    
+    res.json({ url: result.secure_url });
   } catch (error) {
+    console.error('Upload Error:', error);
     res.status(500).json({ message: 'Error uploading image' });
   }
 });

@@ -30,8 +30,14 @@ const SplashScreen = ({ finishLoading, isLoading }) => {
           scale: isLoading ? 1 : 1.2 
         }}
         transition={{ duration: 1, ease: "easeInOut" }}
+        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}
       >
-        <h1 className="splash-title">MoonLight</h1>
+        <img 
+          src="https://res.cloudinary.com/ddglanrrg/image/upload/v1784363791/moonlight-logo_oulp3m.png" 
+          alt="MoonLight Logo" 
+          style={{ width: '280px', objectFit: 'contain' }} 
+        />
+        <h1 className="splash-title" style={{ margin: 0 }}>MoonLight</h1>
       </motion.div>
     </motion.div>
   );

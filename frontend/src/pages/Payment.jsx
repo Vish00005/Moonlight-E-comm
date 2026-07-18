@@ -4,19 +4,23 @@ import { motion } from 'framer-motion';
 import { CheckCircle, Truck, CreditCard, ArrowRight, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import { CartContext } from '../context/CartContext';
 import './Payment.css';
 
 const Payment = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const product = location.state?.product;
-  const { user, updateProfile } = useContext(AuthContext);
+  const orderItems = location.state?.orderItems;
+  const total = location.state?.total;
   
-  const [step, setStep] = useState(1); // 1: Address, 2: Payment Method
+  const { user, updateProfile } = useContext(AuthContext);
+  const { clearCart } = useContext(CartContext);
+  
+  const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   
-  const [paymentMethod, setPaymentMethod] = useState('Razorpay'); // 'Razorpay' or 'COD'
+  const [paymentMethod, setPaymentMethod] = useState('Razorpay');
   const [deliveryInfo, setDeliveryInfo] = useState({
     address: '', city: '', postalCode: '', country: '', phone: ''
   });
@@ -35,13 +39,12 @@ const Payment = () => {
     }
   }, [user, navigate]);
 
-  if (!product || !user) {
+  if (!orderItems || !user) {
     return <Navigate to="/" replace />;
   }
 
   const handleAddressSubmit = async (e) => {
     e.preventDefault();
-    // Save address to profile if they changed it
     if (deliveryInfo.address !== user.address || deliveryInfo.city !== user.city) {
       await updateProfile({ ...user, ...deliveryInfo });
     }
@@ -51,34 +54,29 @@ const Payment = () => {
   const handleOrderSubmit = async () => {
     setIsProcessing(true);
     const config = { headers: { Authorization: `Bearer ${user.token}` } };
-    const orderItems = [{
-      name: product.name, qty: 1, image: product.image, price: product.price, product: product._id
-    }];
 
     try {
       if (paymentMethod === 'COD') {
-        await axios.post('/api/orders', { orderItems, totalPrice: product.price, paymentMethod: 'COD' }, config);
+        await axios.post('/api/orders', { orderItems, totalPrice: total, paymentMethod: 'COD' }, config);
         showSuccess();
       } else {
-        // Razorpay Flow
         const { data: configData } = await axios.get('/api/payment/config');
-        const { data: orderData } = await axios.post('/api/payment/create', { amount: product.price }, config);
+        const { data: orderData } = await axios.post('/api/payment/create', { amount: total }, config);
 
         const options = {
           key: configData.clientId,
           amount: orderData.amount,
           currency: orderData.currency,
           name: "MoonLight Jewels",
-          description: "Test Transaction",
+          description: "Purchase Transaction",
           order_id: orderData.id,
           handler: async function (response) {
             try {
               const verifyRes = await axios.post('/api/payment/verify', response, config);
               if (verifyRes.status === 200) {
-                // Payment successful, create order
                 await axios.post('/api/orders', { 
                   orderItems, 
-                  totalPrice: product.price, 
+                  totalPrice: total, 
                   paymentMethod: 'Razorpay',
                   isPaid: true,
                   paidAt: new Date(),
@@ -95,14 +93,8 @@ const Payment = () => {
               setIsProcessing(false);
             }
           },
-          prefill: {
-            name: user.name,
-            email: user.email,
-            contact: deliveryInfo.phone
-          },
-          theme: {
-            color: "#1a1a1a"
-          }
+          prefill: { name: user.name, email: user.email, contact: deliveryInfo.phone },
+          theme: { color: "#1a1a1a" }
         };
 
         const rzp = new window.Razorpay(options);
@@ -121,6 +113,7 @@ const Payment = () => {
   const showSuccess = () => {
     setIsProcessing(false);
     setIsSuccess(true);
+    clearCart();
     setTimeout(() => navigate('/profile'), 3000);
   };
 
@@ -130,24 +123,29 @@ const Payment = () => {
         <motion.div className="payment-success-card" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
           <CheckCircle size={64} color="#10b981" className="success-icon" />
           <h2>Order Placed Successfully!</h2>
-          <p>Thank you for purchasing the <strong>{product.name}</strong>.</p>
+          <p>Thank you for shopping at MoonLight Jewels.</p>
           <p>Redirecting you to your profile...</p>
         </motion.div>
       ) : (
         <motion.div className="payment-container" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="payment-summary">
             <h3>Order Summary</h3>
-            <div className="summary-item">
-              <img src={product.image} alt={product.name} />
-              <div className="summary-info">
-                <h4>{product.name}</h4>
-                <span>₹{product.price.toFixed(2)}</span>
-              </div>
+            <div className="summary-items-list" style={{ maxHeight: '300px', overflowY: 'auto', paddingRight: '10px' }}>
+              {orderItems.map((item, index) => (
+                <div key={index} className="summary-item" style={{ marginBottom: '15px' }}>
+                  <img src={item.image} alt={item.name} />
+                  <div className="summary-info">
+                    <h4>{item.name}</h4>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Qty: {item.qty}</span>
+                    <span>₹{(item.price * item.qty).toFixed(2)}</span>
+                  </div>
+                </div>
+              ))}
             </div>
             <hr />
             <div className="summary-total">
               <span>Total to Pay</span>
-              <strong>₹{product.price.toFixed(2)}</strong>
+              <strong>₹{total?.toFixed(2)}</strong>
             </div>
           </div>
           
@@ -209,7 +207,7 @@ const Payment = () => {
                     <ArrowLeft size={18} style={{ marginRight: '8px' }} /> Back
                   </button>
                   <button type="button" className="btn-primary btn-pay" onClick={handleOrderSubmit} disabled={isProcessing} style={{ flex: 2 }}>
-                    {isProcessing ? 'Processing...' : `Place Order (₹${product.price.toFixed(2)})`}
+                    {isProcessing ? 'Processing...' : `Place Order (₹${total?.toFixed(2)})`}
                   </button>
                 </div>
               </div>

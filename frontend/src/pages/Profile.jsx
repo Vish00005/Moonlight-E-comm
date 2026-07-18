@@ -55,6 +55,20 @@ const Profile = () => {
     }
   };
 
+  const handleCancelOrder = async (orderId) => {
+    if (window.confirm('Are you sure you want to cancel this order?')) {
+      try {
+        const config = { headers: { Authorization: `Bearer ${user.token}` } };
+        await axios.put(`/api/orders/${orderId}/cancel`, {}, config);
+        // Refresh orders
+        const { data } = await axios.get('/api/orders/myorders', config);
+        setOrders(data);
+      } catch (err) {
+        alert(err.response?.data?.message || 'Error cancelling order');
+      }
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -119,8 +133,8 @@ const Profile = () => {
               <div key={order._id} className="order-card">
                 <div className="order-header">
                   <h4>Order #{order._id.substring(0, 8)}</h4>
-                  <span className={`status ${order.isDelivered ? 'delivered' : 'processing'}`}>
-                    {order.isDelivered ? 'Delivered' : 'Processing'}
+                  <span className={`status ${order.deliveryStatus?.toLowerCase()}`}>
+                    {order.deliveryStatus || (order.isDelivered ? 'Delivered' : 'Ordered')}
                   </span>
                 </div>
                 <p>Date: {new Date(order.createdAt).toLocaleDateString()}</p>
@@ -137,6 +151,18 @@ const Profile = () => {
                     </div>
                   ))}
                 </div>
+
+                {(order.deliveryStatus === 'Ordered' || order.deliveryStatus === 'Packed' || (!order.deliveryStatus && !order.isDelivered)) && (
+                  <div className="order-actions" style={{ marginTop: '15px', borderTop: '1px solid var(--border-color)', paddingTop: '15px' }}>
+                    <button 
+                      onClick={() => handleCancelOrder(order._id)}
+                      className="btn-secondary"
+                      style={{ color: '#ef4444', borderColor: '#ef4444' }}
+                    >
+                      Cancel Order
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
