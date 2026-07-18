@@ -22,8 +22,65 @@
 
 .payment-summary {
   background: var(--bg-card);
-  padding: 40px;
-  border-right: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.checkout-steps {
+  display: flex;
+  margin-bottom: 25px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+.step.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.method-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.method-card:hover {
+  border-color: var(--primary);
+}
+
+.method-card.selected {
+  border-color: var(--primary);
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.method-card input[type="radio"] {
+  accent-color: var(--primary);
+  width: 18px;
+  height: 18px;
+}
+
+.method-card span {
+  font-weight: 500;
+}  border-right: 1px solid var(--border-color);
 }
 
 .payment-summary h3 {

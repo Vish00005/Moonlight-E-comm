@@ -150,8 +150,26 @@ const AdminDashboard = () => {
                   </div>
                 </div>
                 <div className="form-group">
-                  <label>Image URL (Cloudinary)</label>
-                  <input type="text" name="image" value={formData.image} onChange={handleInputChange} required className="input-field" placeholder="https://res.cloudinary.com/..." />
+                  <label>Image Upload (Cloudinary)</label>
+                  <input 
+                    type="file" 
+                    onChange={async (e) => {
+                      const file = e.target.files[0];
+                      if (!file) return;
+                      const uploadData = new FormData();
+                      uploadData.append('image', file);
+                      try {
+                        const { data } = await axios.post('/api/upload', uploadData, config);
+                        setFormData({ ...formData, image: data.url });
+                      } catch (err) {
+                        alert('Image upload failed');
+                      }
+                    }} 
+                    className="input-field" 
+                    accept="image/*" 
+                    style={{ padding: '6px' }}
+                  />
+                  {formData.image && <p style={{ fontSize: '12px', marginTop: '5px', color: 'var(--primary)' }}>Image ready!</p>}
                 </div>
                 <div className="form-group">
                   <label>Description</label>
