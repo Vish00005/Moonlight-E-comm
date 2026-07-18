@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 import CategoryScroller from '../components/CategoryScroller';
 import ProductCard from '../components/ProductCard';
-import { products as dummyProducts } from '../data/products';
 import './Home.css';
 
 const containerVariants = {
@@ -24,14 +24,26 @@ const itemVariants = {
 };
 
 const Home = () => {
-  const [products, setProducts] = useState(dummyProducts);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const searchTerm = searchParams.get('search');
 
   useEffect(() => {
-    // In a real app, fetch products based on category here if needed
+    const fetchProducts = async () => {
+      try {
+        const { data } = await axios.get('/api/products');
+        setProducts(data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.response?.data?.message || err.message);
+        setLoading(false);
+      }
+    };
+    fetchProducts();
   }, []);
 
   const displayedProducts = products.filter(p => {
@@ -78,12 +90,19 @@ const Home = () => {
           animate="visible"
           key={selectedCategory} // Force re-animation on category change
         >
-          {displayedProducts.map(product => (
-            <motion.div key={product._id} variants={itemVariants}>
-              <ProductCard product={product} />
-            </motion.div>
-          ))}
-          {displayedProducts.length === 0 && <p style={{ color: 'var(--text-muted)' }}>No products found in this category.</p>}
+          {loading ? (
+            <p>Loading products...</p>
+          ) : error ? (
+            <p style={{ color: 'red' }}>Error: {error}</p>
+          ) : displayedProducts.length === 0 ? (
+            <p style={{ color: 'var(--text-muted)' }}>No products found in this category.</p>
+          ) : (
+            displayedProducts.map(product => (
+              <motion.div key={product._id} variants={itemVariants}>
+                <ProductCard product={product} />
+              </motion.div>
+            ))
+          )}
         </motion.div>
       </div>
     </div>

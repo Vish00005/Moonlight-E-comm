@@ -1,4 +1,5 @@
 import Order from '../models/Order.js';
+import Product from '../models/Product.js';
 
 export const addOrderItems = async (req, res) => {
   try {
@@ -33,6 +34,25 @@ export const getOrders = async (req, res) => {
   try {
     const orders = await Order.find({}).populate('user', 'id name');
     res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Admin only Analytics
+export const getAnalytics = async (req, res) => {
+  try {
+    const orders = await Order.find({});
+    const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+    const totalOrders = orders.length;
+    
+    const totalProducts = await Product.countDocuments({});
+    
+    res.json({
+      totalRevenue,
+      totalOrders,
+      totalProducts
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

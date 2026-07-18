@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ShoppingCart, CreditCard } from 'lucide-react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 import { CartContext } from '../context/CartContext';
-import { products } from '../data/products';
 import './ProductDetails.css';
 
 const ProductDetails = () => {
@@ -11,15 +11,33 @@ const ProductDetails = () => {
   const navigate = useNavigate();
   const { addToCart } = useContext(CartContext);
   const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // In a real app, this would be an API call to /api/products/:id
-    const foundProduct = products.find(p => p._id === id);
-    setProduct(foundProduct);
+    const fetchProduct = async () => {
+      try {
+        const { data } = await axios.get(`/api/products/${id}`);
+        setProduct(data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.response?.data?.message || err.message);
+        setLoading(false);
+      }
+    };
+    fetchProduct();
   }, [id]);
 
+  if (loading) {
+    return <div className="container" style={{ paddingTop: '120px', textAlign: 'center' }}>Loading product details...</div>;
+  }
+
+  if (error) {
+    return <div className="container" style={{ paddingTop: '120px', textAlign: 'center', color: 'red' }}>{error}</div>;
+  }
+
   if (!product) {
-    return <div className="container" style={{ paddingTop: '120px', textAlign: 'center' }}>Loading...</div>;
+    return <div className="container" style={{ paddingTop: '120px', textAlign: 'center' }}>Product not found</div>;
   }
 
   const handleBuyNow = () => {
