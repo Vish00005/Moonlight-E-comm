@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
@@ -32,6 +32,11 @@ const Home = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const searchTerm = searchParams.get('search');
+  const productsRef = useRef(null);
+
+  const scrollToProducts = () => {
+    productsRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -74,7 +79,7 @@ const Home = () => {
         <div className="container hero-content">
           <h1>Simplicity is the Ultimate Sophistication</h1>
           <p>Curated minimalist accessories for everyday elegance.</p>
-          <button className="btn-primary">Explore Collection</button>
+          <button className="btn-primary" onClick={scrollToProducts}>Explore Collection</button>
         </div>
       </motion.div>
       
@@ -91,7 +96,7 @@ const Home = () => {
           />
         </motion.div>
         
-        <h2 className="section-title">
+        <h2 className="section-title" ref={productsRef}>
           {searchTerm ? `Search Results for "${searchTerm}"` : (selectedCategory === 'All' ? "New Arrivals" : `${selectedCategory} Collection`)}
         </h2>
         

@@ -1,5 +1,6 @@
 .hero {
-  background: var(--accent); /* Soft gray background instead of image for plain aesthetic */
+  background: url('https://res.cloudinary.com/ddglanrrg/image/upload/v1784474343/bg_dkgyhi.png') no-repeat center center;
+  background-size: cover;
   padding: 120px 0;
   text-align: center;
   border-bottom: 1px solid var(--border-color);
