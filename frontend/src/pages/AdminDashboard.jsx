@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Trash2, Edit, Plus, BarChart2, Package, ShoppingBag } from 'lucide-react';
+import { Trash2, Edit, Plus, BarChart2, Package, ShoppingBag, List } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import './AdminDashboard.css';
 
@@ -13,12 +13,16 @@ const AdminDashboard = () => {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [analytics, setAnalytics] = useState(null);
+  const [categories, setCategories] = useState([]);
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
-    name: '', price: '', description: '', image: '', category: '', countInStock: 0
+    name: '', price: '', description: '', image: '', category: [], countInStock: 0
   });
+
+  const [categoryFormData, setCategoryFormData] = useState({ name: '', image: '' });
+  const [isCategoryFormOpen, setIsCategoryFormOpen] = useState(false);
 
   const config = {
     headers: { Authorization: `Bearer ${user?.token}` }
@@ -32,7 +36,17 @@ const AdminDashboard = () => {
     fetchProducts();
     fetchOrders();
     fetchAnalytics();
+    fetchCategories();
   }, [user, navigate]);
+
+  const fetchCategories = async () => {
+    try {
+      const { data } = await axios.get('/api/categories');
+      setCategories(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -74,13 +88,55 @@ const AdminDashboard = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleCategoryCheckboxChange = (e) => {
+    const { value, checked } = e.target;
+    let newCategories = [...formData.category];
+    if (checked) {
+      newCategories.push(value);
+    } else {
+      newCategories = newCategories.filter(cat => cat !== value);
+    }
+    setFormData({ ...formData, category: newCategories });
+  };
+
+  const handleCategoryInputChange = (e) => {
+    setCategoryFormData({ ...categoryFormData, [e.target.name]: e.target.value });
+  };
+
+  const handleCategorySubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('/api/categories', categoryFormData, config);
+      fetchCategories();
+      setIsCategoryFormOpen(false);
+      setCategoryFormData({ name: '', image: '' });
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error saving category');
+    }
+  };
+
+  const handleDeleteCategory = async (id) => {
+    if (window.confirm('Are you sure you want to delete this category?')) {
+      try {
+        await axios.delete(`/api/categories/${id}`, config);
+        fetchCategories();
+      } catch (err) {
+        alert(err.response?.data?.message || 'Error deleting category');
+      }
+    }
+  };
+
   const openForm = (product = null) => {
     if (product) {
       setEditingId(product._id);
-      setFormData(product);
+      // Ensure category is an array even for older string-based products
+      const categoryArray = Array.isArray(product.category) 
+        ? product.category 
+        : (product.category ? [product.category] : []);
+      setFormData({ ...product, category: categoryArray });
     } else {
       setEditingId(null);
-      setFormData({ name: '', price: '', description: '', image: '', category: '', countInStock: 0 });
+      setFormData({ name: '', price: '', description: '', image: '', category: [], countInStock: 0 });
     }
     setIsFormOpen(true);
   };
@@ -130,6 +186,12 @@ const AdminDashboard = () => {
             <Package size={18} /> Products
           </button>
           <button 
+            className={`tab-btn ${activeTab === 'categories' ? 'active' : ''}`}
+            onClick={() => setActiveTab('categories')}
+          >
+            <List size={18} /> Categories
+          </button>
+          <button 
             className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
             onClick={() => setActiveTab('orders')}
           >
@@ -167,8 +229,21 @@ const AdminDashboard = () => {
                     <input type="number" name="price" value={formData.price} onChange={handleInputChange} required className="input-field" />
                   </div>
                   <div className="form-group">
-                    <label>Category</label>
-                    <input type="text" name="category" value={formData.category} onChange={handleInputChange} required className="input-field" />
+                    <label>Categories</label>
+                    <div className="category-checkboxes">
+                      {categories.map(cat => (
+                        <label key={cat._id} className="checkbox-label">
+                          <input 
+                            type="checkbox" 
+                            value={cat.name} 
+                            checked={formData.category.includes(cat.name)}
+                            onChange={handleCategoryCheckboxChange}
+                          />
+                          {cat.name}
+                        </label>
+                      ))}
+                      {categories.length === 0 && <span className="no-categories">No categories available. Please add categories first.</span>}
+                    </div>
                   </div>
                   <div className="form-group">
                     <label>Stock Count</label>
@@ -230,7 +305,7 @@ const AdminDashboard = () => {
                       <td><img src={product.image} alt={product.name} className="table-img" /></td>
                       <td>{product.name}</td>
                       <td>₹{product.price.toFixed(2)}</td>
-                      <td>{product.category}</td>
+                      <td>{Array.isArray(product.category) ? product.category.join(', ') : product.category}</td>
                       <td className="table-actions">
                         <button className="btn-icon edit" onClick={() => openForm(product)}><Edit size={18} /></button>
                         <button className="btn-icon delete" onClick={() => handleDelete(product._id)}><Trash2 size={18} /></button>
@@ -240,6 +315,87 @@ const AdminDashboard = () => {
                   {products.length === 0 && (
                     <tr>
                       <td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>No products found in database.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'categories' && (
+          <div className="categories-section">
+            <div className="section-header">
+              <h3>Manage Categories</h3>
+              <button className="btn-primary" onClick={() => setIsCategoryFormOpen(!isCategoryFormOpen)}>
+                <Plus size={18} /> {isCategoryFormOpen ? 'Cancel' : 'Add Category'}
+              </button>
+            </div>
+
+            {isCategoryFormOpen && (
+              <form onSubmit={handleCategorySubmit} className="admin-form">
+                <h4>Add New Category</h4>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Name</label>
+                    <input type="text" name="name" value={categoryFormData.name} onChange={handleCategoryInputChange} required className="input-field" />
+                  </div>
+                  <div className="form-group">
+                    <label>Image Upload (Cloudinary)</label>
+                    <input 
+                      type="file" 
+                      onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const uploadData = new FormData();
+                        uploadData.append('image', file);
+                        try {
+                          const { data } = await axios.post('/api/upload', uploadData, config);
+                          setCategoryFormData({ ...categoryFormData, image: data.url });
+                        } catch (err) {
+                          alert('Image upload failed');
+                        }
+                      }} 
+                      className="input-field" 
+                      accept="image/*" 
+                      style={{ padding: '6px' }}
+                    />
+                    {categoryFormData.image && (
+                      <div style={{ marginTop: '10px' }}>
+                        <img src={categoryFormData.image} alt="Preview" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border-color)' }} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="form-actions">
+                  <button type="submit" className="btn-primary" disabled={!categoryFormData.name || !categoryFormData.image}>Save Category</button>
+                  <button type="button" className="btn-secondary" onClick={() => setIsCategoryFormOpen(false)}>Cancel</button>
+                </div>
+              </form>
+            )}
+
+            <div className="table-responsive">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categories.map(category => (
+                    <tr key={category._id}>
+                      <td><img src={category.image} alt={category.name} className="table-img" /></td>
+                      <td>{category.name}</td>
+                      <td className="table-actions">
+                        <button className="btn-icon delete" onClick={() => handleDeleteCategory(category._id)}><Trash2 size={18} /></button>
+                      </td>
+                    </tr>
+                  ))}
+                  {categories.length === 0 && (
+                    <tr>
+                      <td colSpan="3" style={{ textAlign: 'center', padding: '20px' }}>No categories found.</td>
                     </tr>
                   )}
                 </tbody>
