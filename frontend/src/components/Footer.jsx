@@ -31,9 +31,9 @@ const Footer = () => {
         <div className="footer-section">
           <h4 className="footer-subtitle">Contact</h4>
           <ul className="footer-links">
-            <li>Email: support@moonlight.com</li>
-            <li>Phone: +1 234 567 890</li>
-            <li>Address: 123 Elegance Ave, NY</li>
+            <li>Email: krishnakhimsuriya777@gmail.com</li>
+            <li>Phone: +91 8511083841</li>
+            <li>Address: Nadiad,Gujarat,India</li>
           </ul>
         </div>
       </div>
