@@ -1,5 +1,5 @@
 /* index.css */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap");
 
 :root {
   --primary: #ffffff; /* Clean white */
@@ -16,7 +16,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
 }
 
 body {
@@ -47,7 +47,7 @@ button {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding-inline: 24px;
 }
 
 /* Utilities */
@@ -59,7 +59,9 @@ button {
   font-weight: 500;
   font-size: 16px;
   letter-spacing: 0.5px;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
   border: 1px solid var(--secondary);
 }
 
