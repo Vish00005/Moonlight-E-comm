@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Lavishly+Yours&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Lavishly+Yours&display=swap");
 
 .splash-screen {
   position: fixed;
@@ -18,7 +18,7 @@
 }
 
 .splash-title {
-  font-family: 'Lavishly Yours', cursive;
+  font-family: "Lavishly Yours", cursive;
   font-size: 8rem;
   color: var(--text-main);
   font-weight: 400;
