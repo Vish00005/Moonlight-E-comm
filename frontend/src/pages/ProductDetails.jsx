@@ -74,7 +74,7 @@ const ProductDetails = () => {
           
           <div className="product-description-block">
             <h3>Description</h3>
-            <p>{product.description}</p>
+            <p style={{ whiteSpace: 'pre-wrap' }}>{product.description}</p>
           </div>
           
           <div className="product-actions">

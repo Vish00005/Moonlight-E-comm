@@ -20,7 +20,7 @@ const CategoryScroller = ({ categories = dummyCategories, selectedCategory, onSe
           const isSelected = selectedCategory === cat.name;
           return (
             <motion.div 
-              key={cat.id} 
+              key={cat._id || cat.id} 
               className={`category-item ${isSelected ? 'selected' : ''}`}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}

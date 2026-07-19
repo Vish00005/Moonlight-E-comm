@@ -25,6 +25,7 @@ const itemVariants = {
 
 const Home = () => {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -33,22 +34,32 @@ const Home = () => {
   const searchTerm = searchParams.get('search');
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const { data } = await axios.get('/api/products');
-        setProducts(data);
+        const [productsRes, categoriesRes] = await Promise.all([
+          axios.get('/api/products'),
+          axios.get('/api/categories')
+        ]);
+        setProducts(productsRes.data);
+        setCategories(categoriesRes.data);
         setLoading(false);
       } catch (err) {
         setError(err.response?.data?.message || err.message);
         setLoading(false);
       }
     };
-    fetchProducts();
+    fetchData();
   }, []);
+
+  const allCategories = [
+    { _id: 'all', name: 'All', image: 'https://images.unsplash.com/photo-1596944924616-7b38e7cfac36?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80' },
+    ...categories
+  ];
 
   const displayedProducts = products.filter(p => {
     const matchesSearch = searchTerm ? p.name.toLowerCase().includes(searchTerm.toLowerCase()) : true;
-    const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'All' || 
+      (Array.isArray(p.category) ? p.category.includes(selectedCategory) : p.category === selectedCategory);
     return matchesSearch && matchesCategory;
   });
 
@@ -74,6 +85,7 @@ const Home = () => {
           transition={{ delay: 0.3, duration: 0.8 }}
         >
           <CategoryScroller 
+            categories={allCategories}
             selectedCategory={selectedCategory} 
             onSelectCategory={setSelectedCategory} 
           />
