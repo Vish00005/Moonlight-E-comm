@@ -1,6 +1,9 @@
+import { OAuth2Client } from 'google-auth-library';
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || 'secret', { expiresIn: '30d' });
@@ -74,6 +77,31 @@ export const updateUserProfile = async (req, res) => {
     } else {
       res.status(404).json({ message: 'User not found' });
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const googleLogin = async (req, res) => {
+  const { credential } = req.body;
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { email, name } = payload;
+    
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({ name, email });
+    }
+    
+    res.json({
+      _id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin,
+      phone: user.phone, address: user.address, city: user.city, postalCode: user.postalCode, country: user.country,
+      token: generateToken(user._id)
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

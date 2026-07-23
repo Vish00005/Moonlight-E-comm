@@ -40,6 +40,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const googleLogin = async (credential) => {
+    try {
+      const { data } = await axios.post('/api/auth/google', { credential });
+      setUser(data);
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      return { success: true, isAdmin: data.isAdmin };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Google Login failed' };
+    }
+  };
+
+
   const updateProfile = async (userData) => {
     try {
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
@@ -58,7 +70,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, updateProfile, loading }}>
+    <AuthContext.Provider value={{ user, login, register, googleLogin, logout, updateProfile, loading }}>
       {children}
     </AuthContext.Provider>
   );

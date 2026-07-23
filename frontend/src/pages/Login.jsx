@@ -1,13 +1,14 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { GoogleLogin } from '@react-oauth/google';
 import './Auth.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login } = useContext(AuthContext);
+  const { login, googleLogin } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -22,6 +23,23 @@ const Login = () => {
     } else {
       setError(res.message);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    const res = await googleLogin(credentialResponse.credential);
+    if (res.success) {
+      if (res.isAdmin) {
+        navigate('/admin-moonlight-secret');
+      } else {
+        navigate(-1);
+      }
+    } else {
+      setError(res.message);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google Sign-In failed. Please try again.');
   };
 
   return (
@@ -48,6 +66,12 @@ const Login = () => {
           />
           <button type="submit" className="btn-primary" style={{ width: '100%' }}>Login</button>
         </form>
+        <div style={{ margin: '20px 0', display: 'flex', justifyContent: 'center' }}>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+          />
+        </div>
         <p className="auth-footer">
           Don't have an account? <Link to="/register">Register here</Link>
         </p>

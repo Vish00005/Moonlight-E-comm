@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { GoogleLogin } from '@react-oauth/google';
 import './Auth.css';
 
 const Register = () => {
@@ -8,7 +9,7 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { register } = useContext(AuthContext);
+  const { register, googleLogin } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -19,6 +20,19 @@ const Register = () => {
     } else {
       setError(res.message);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    const res = await googleLogin(credentialResponse.credential);
+    if (res.success) {
+      navigate('/');
+    } else {
+      setError(res.message);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google Sign-In failed. Please try again.');
   };
 
   return (
@@ -53,6 +67,12 @@ const Register = () => {
           />
           <button type="submit" className="btn-primary" style={{ width: '100%' }}>Register</button>
         </form>
+        <div style={{ margin: '20px 0', display: 'flex', justifyContent: 'center' }}>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+          />
+        </div>
         <p className="auth-footer">
           Already have an account? <Link to="/login">Login here</Link>
         </p>
